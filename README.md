@@ -67,3 +67,30 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accur
 model.summary()
 #TRAIN THE MODEL
 model.fit(X, y,epochs=100, batch_size=128,verbose=1)
+
+Step 5: Sentence Completion Function
+def complete_sentence(seed_text, num_words):
+    for _ in range(num_words):
+        token_list = tokenizer.texts_to_sequences([seed_text])[0]
+        token_list = pad_sequences([token_list], maxlen=max_len-1, padding='pre')
+
+        predicted_probs = model.predict(token_list, verbose=0)
+        predicted_probs[0][0] = 0   # avoid padding token only
+
+        predicted_word_index = np.argmax(predicted_probs)
+        output_word = tokenizer.index_word.get(predicted_word_index)
+
+        if output_word is None:
+            print("Unknown index:", predicted_word_index)
+            break
+
+        seed_text += " " + output_word
+
+    return seed_text
+
+Step 6: Test the Model for Sentence Completion
+seed_text = "the ladies"
+completed_sentence = complete_sentence(seed_text, num_words=10)
+
+print(f"Seed: {seed_text}\nCompleted Sentence: {completed_sentence}")
+
